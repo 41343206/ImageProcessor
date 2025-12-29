@@ -110,9 +110,20 @@ void ImageProcessor::handleSelection(QRect selection)
         return;
     }
     
-    // Calculate the scaling factor
-    qreal scaleX = (qreal)img.width() / imgWin->width();
-    qreal scaleY = (qreal)img.height() / imgWin->height();
+    // Check for zero dimensions to prevent division by zero
+    if (imgWin->width() == 0 || imgWin->height() == 0) {
+        return;
+    }
+    
+    // Get the pixmap to calculate actual displayed image dimensions
+    const QPixmap *pix = imgWin->pixmap();
+    if (!pix) {
+        return;
+    }
+    
+    // Calculate the scaling factor based on actual pixmap size
+    qreal scaleX = (qreal)img.width() / pix->width();
+    qreal scaleY = (qreal)img.height() / pix->height();
     
     // Map selection from widget coordinates to image coordinates
     QRect imageRect(

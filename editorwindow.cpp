@@ -58,10 +58,27 @@ void DrawableLabel::paintEvent(QPaintEvent *event)
 
 void DrawableLabel::drawLineTo(const QPoint &endPoint)
 {
-    QPainter painter(&canvasImage);
-    painter.setPen(QPen(penColor, penWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    painter.drawLine(lastPoint, endPoint);
-    lastPoint = endPoint;
+    // Validate coordinates are within bounds
+    if (!canvasImage.rect().contains(lastPoint) || !canvasImage.rect().contains(endPoint)) {
+        // If either point is outside, clamp to bounds
+        QPoint clampedLast = lastPoint;
+        QPoint clampedEnd = endPoint;
+        
+        clampedLast.setX(qBound(0, clampedLast.x(), canvasImage.width() - 1));
+        clampedLast.setY(qBound(0, clampedLast.y(), canvasImage.height() - 1));
+        clampedEnd.setX(qBound(0, clampedEnd.x(), canvasImage.width() - 1));
+        clampedEnd.setY(qBound(0, clampedEnd.y(), canvasImage.height() - 1));
+        
+        QPainter painter(&canvasImage);
+        painter.setPen(QPen(penColor, penWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter.drawLine(clampedLast, clampedEnd);
+        lastPoint = clampedEnd;
+    } else {
+        QPainter painter(&canvasImage);
+        painter.setPen(QPen(penColor, penWidth, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter.drawLine(lastPoint, endPoint);
+        lastPoint = endPoint;
+    }
     
     setPixmap(QPixmap::fromImage(canvasImage));
 }

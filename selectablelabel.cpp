@@ -15,9 +15,13 @@ void SelectableLabel::setImage(const QImage &image)
 void SelectableLabel::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton && !currentImage.isNull()) {
-        startPoint = event->pos();
-        endPoint = event->pos();
-        selecting = true;
+        // Ensure mouse position is within widget bounds
+        QPoint pos = event->pos();
+        if (rect().contains(pos)) {
+            startPoint = pos;
+            endPoint = pos;
+            selecting = true;
+        }
     }
     QLabel::mousePressEvent(event);
 }
@@ -41,7 +45,7 @@ void SelectableLabel::mouseReleaseEvent(QMouseEvent *event)
         QRect selection = QRect(startPoint, endPoint).normalized();
         
         // Emit signal with the selection
-        if (selection.width() > 5 && selection.height() > 5) {
+        if (selection.width() > MIN_SELECTION_SIZE && selection.height() > MIN_SELECTION_SIZE) {
             emit selectionMade(selection);
         }
         

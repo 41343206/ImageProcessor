@@ -13,6 +13,8 @@ class SelectableLabel : public QLabel
 public:
     explicit SelectableLabel(QWidget *parent = nullptr);
     void setImage(const QImage &image);
+    
+    static const int MIN_SELECTION_SIZE = 5;
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
