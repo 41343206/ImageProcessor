@@ -1,4 +1,5 @@
 #include "imageprocessor.h"
+#include "editorwindow.h"
 #include <QHBoxLayout>
 #include <QMenuBar>
 #include <QFileDialog>
@@ -10,7 +11,7 @@ ImageProcessor::ImageProcessor(QWidget *parent)
     setWindowTitle(tr("影像處理"));
     central = new QWidget();
     QHBoxLayout *mainLayout = new QHBoxLayout(central);
-    imgWin = new QLabel();
+    imgWin = new SelectableLabel();
     QPixmap *initPixmap = new QPixmap(300,400);
     initPixmap->fill(QColor(255,255,128));
     imgWin->resize(300,200);
@@ -21,6 +22,9 @@ ImageProcessor::ImageProcessor(QWidget *parent)
     createActions();
     createMenus();
     createToolbars();
+    
+    // Connect selection signal
+    connect(imgWin, &SelectableLabel::selectionMade, this, &ImageProcessor::handleSelection);
 }
 
 ImageProcessor::~ImageProcessor() {}
@@ -68,7 +72,7 @@ void ImageProcessor::loadFile(QString filename){
     QByteArray ba = filename.toLatin1();
     printf("FN:%s\n",(char *) ba.data());
     img.load(filename);
-    imgWin->setPixmap(QPixmap::fromImage(img));
+    imgWin->setImage(img);
 }
 void ImageProcessor::showOpenFile(){
     filename = QFileDialog::getOpenFileName(this,tr("開啟影像"),
@@ -98,4 +102,44 @@ void ImageProcessor::getZoomOut(){
     QLabel *ret = new QLabel();
     ret->setPixmap(QPixmap::fromImage(zoomedOut));
     ret->show();
+}
+
+void ImageProcessor::handleSelection(QRect selection)
+{
+    if (img.isNull()) {
+        return;
+    }
+    
+    // Calculate the scaling factor
+    qreal scaleX = (qreal)img.width() / imgWin->width();
+    qreal scaleY = (qreal)img.height() / imgWin->height();
+    
+    // Map selection from widget coordinates to image coordinates
+    QRect imageRect(
+        selection.x() * scaleX,
+        selection.y() * scaleY,
+        selection.width() * scaleX,
+        selection.height() * scaleY
+    );
+    
+    // Ensure the rectangle is within image bounds
+    imageRect = imageRect.intersected(img.rect());
+    
+    if (imageRect.width() > 0 && imageRect.height() > 0) {
+        // Extract the selected region
+        QImage selectedRegion = img.copy(imageRect);
+        
+        // Scale it by 2x
+        QImage zoomedRegion = selectedRegion.scaled(
+            selectedRegion.width() * 2,
+            selectedRegion.height() * 2,
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation
+        );
+        
+        // Open editor window with zoomed region
+        EditorWindow *editor = new EditorWindow(zoomedRegion);
+        editor->setAttribute(Qt::WA_DeleteOnClose);
+        editor->show();
+    }
 }

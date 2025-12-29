@@ -10,10 +10,14 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    imageprocessor.cpp
+    imageprocessor.cpp \
+    selectablelabel.cpp \
+    editorwindow.cpp
 
 HEADERS += \
-    imageprocessor.h
+    imageprocessor.h \
+    selectablelabel.h \
+    editorwindow.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
