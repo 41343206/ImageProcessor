@@ -8,7 +8,6 @@
 #include<QToolBar>
 #include<QImage>
 #include<QLabel>
-#include "selectablelabel.h"
 
 class ImageProcessor : public QMainWindow
 {
@@ -25,7 +24,6 @@ private slots:
     void showOpenFile();
     void getZoomOut();
     void getZoomIn();
-    void handleSelection(QRect selection);
 
 private:
     QWidget     *central;
@@ -33,7 +31,7 @@ private:
     QToolBar    *fileTool;
     QImage      img;
     QString     filename;
-    SelectableLabel *imgWin;
+    QLabel      *imgWin;
     QAction     *OpenFileAction;
     QAction     *exitAction;
     QAction     *zoomInAction;
